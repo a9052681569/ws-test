@@ -1,0 +1,23 @@
+{
+	"/ws": {
+		"target": "http://localhost:8999/",
+		"secure": false,
+		"timeout": 360000,
+		"logLevel": "debug",
+		"pathRewrite": {
+			"^/ws": ""
+		},
+		"changeOrigin": true,
+		"ws": true
+	},
+	"/cors": {
+		"target": "http://localhost:8999/",
+		"secure": false,
+		"timeout": 360000,
+		"logLevel": "debug",
+		"pathRewrite": {
+		  "^/cors": ""
+		},
+		"changeOrigin": true
+	}
+}

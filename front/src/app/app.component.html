@@ -1,0 +1,17 @@
+<mat-toolbar [color]="canWs ? 'accent': ''">
+	<h1>{{canWs ? 'Мы онлайн' : 'Мы офлайн'}}</h1>
+</mat-toolbar>
+<div style="height: 4px; padding-bottom: 16px;">
+	<mat-progress-bar mode="indeterminate" *ngIf="ws.loading | async"></mat-progress-bar>
+</div>
+
+<button mat-raised-button [disabled]="!canWs" (click)="getCardsWs()">get cards ws</button>
+<button mat-raised-button (click)="getCardsRest()">get cards rest</button>
+<button mat-raised-button (click)="clearCards()">clear cards</button>
+<button mat-raised-button (click)="canWs = !canWs">типа офлайн</button>
+<button mat-raised-button (click)="loading = !loading">типа загрузка</button>
+
+<div class="container">
+	<app-card *ngFor="let card of cards" [card]="card"></app-card>
+</div>
+

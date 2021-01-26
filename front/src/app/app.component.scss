@@ -1,0 +1,12 @@
+:host {
+	background-color: rgba($color: #1f1f1f, $alpha: .3);
+	display: block;
+	height: 100vh;
+}
+
+.container {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	grid-gap: 16px;
+	padding: 16px;
+}
