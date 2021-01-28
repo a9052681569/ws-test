@@ -36,27 +36,33 @@ export class AppComponent implements OnInit {
 				this.cards = e;
 				this.loading = false;
 			});
-
-		this.ws.loading.subscribe(e => console.log(e));
 	}
 
 	getCardsWs(): void {
 		// tslint:disable-next-line:no-console
 		console.time('ws');
 		this.loading = true;
-		this.ws.send('cards/get');
+		this.ws.send('/cards/get');
 	}
+
+	getCardsByIdWs(): void {
+		// tslint:disable-next-line:no-console
+		console.time('ws');
+		this.loading = true;
+		this.ws.send<string>('/cards/get/id', '1');
+	}
+
 	getCardsRest(): void {
 		// tslint:disable-next-line:no-console
 		console.time('rest');
 
-		this.loading = true;
+		this.ws.loading.next(true);
 		this.http.post<{cards: Card[]}>('cors/get/cards', {})
 			.subscribe(e => {
 				// tslint:disable-next-line:no-console
 				console.timeEnd('rest');
 
-				this.loading = false;
+				this.ws.loading.next(false);
 				this.cards = e.cards;
 			});
 	}

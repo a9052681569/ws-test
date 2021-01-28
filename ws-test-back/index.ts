@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as http from 'http';
 import * as WebSocket from 'ws';
 import { AddressInfo } from 'ws';
-import { mainHandler } from './ws-events-handler';
+import { mainHandler } from './ws-message-handler/ws-message-handler';
 
 const app = express();
 
@@ -16,31 +16,8 @@ wss.on('connection', (ws: WebSocket) => {
 	
     ws.on('message', (message: string) => {
 		const wsMessage: WSMessage<unknown> = JSON.parse(message);
-		console.log(wsMessage);
-		const route = wsMessage.event;
 	   
 		mainHandler.handle(wsMessage, ws)
-
-		// if (route.startsWith('cards/')) {
-
-		// 	wsMessage.event = 'cards'
-
-		// 	if (route.includes('/get')) {
-
-		// 		wsMessage.data = CARDS
-		// 		setTimeout(() => {
-		// 			ws.send(JSON.stringify(wsMessage))
-		// 		}, 1000);
-		// 	}
-
-		// 	if (route.includes('/remove')) {
-		// 		CARDS = CARDS.filter(card => card.id !== wsMessage.data)
-
-		// 		wsMessage.data = CARDS;
-		// 		ws.send(JSON.stringify(wsMessage))
-		// 	}
-			
-		// }
 		
 	});
     
@@ -52,7 +29,7 @@ app.post('/get/cards', (req, res) => {
 })
 
 //start our server
-server.listen(process.env.PORT || 8999, () => {
+server.listen(80 || 8999, () => {
 	const address = server.address() as AddressInfo;
     console.log(`Server started on port ${address.port} :)`);
 });

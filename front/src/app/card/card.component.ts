@@ -19,7 +19,7 @@ export class CardComponent implements OnInit {
 	remove(): void {
 		// tslint:disable-next-line:no-console
 		console.time('ws');
-		this.ws.send('cards/remove', this.card.id);
+		this.ws.send<string>('/cards/remove', this.card.id);
 	}
 
 }

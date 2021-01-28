@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy, Inject } from '@angular/core';
 import {Observable, Subject, Observer, interval, throwError} from 'rxjs';
-import {catchError, filter, finalize, map, shareReplay, takeUntil, tap} from 'rxjs/operators';
+import {catchError, filter, finalize, map, takeUntil, tap} from 'rxjs/operators';
 import { WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 
 import { share, distinctUntilChanged, takeWhile } from 'rxjs/operators';
@@ -39,18 +39,6 @@ export class WebsocketService implements WSService, OnDestroy {
 	private wsMessages$$ = new Subject<WSMessage<unknown>>();
 
 	/**
-	 * Буфер типов сообщений с активной подпиской.
-	 *
-	 */
-	private activeSubscriptions = new Set<string>();
-
-	/**
-	 * Поток новых типов сообщений. Используется для подписки/отписки при наличии подключения.
-	 *
-	 */
-	private subscriptions$$: Subject<WSMessage<unknown>> | null = new Subject<WSMessage<unknown>>();
-
-	/**
 	 * Вспомогательный поток для мониторинга статуса подключения.
 	 */
 	private connection$$: Observer<boolean>;
@@ -77,6 +65,8 @@ export class WebsocketService implements WSService, OnDestroy {
 
 	loading = new Subject<boolean>();
 
+	title = new Subject<string>();
+
 	constructor(@Inject(config) private moduleConfig: WSConfig) {
 		const protocol = environment.production ? 'wss://' : 'ws://';
 
@@ -91,7 +81,7 @@ export class WebsocketService implements WSService, OnDestroy {
 					if (this.moduleConfig.debug) {
 						console.log('[WS] подключен к ', this.wsConfig.url);
 					}
-
+					this.title.next('Мы онлайн');
 					this.connection$$.next(true);
 				}
 			},
@@ -100,7 +90,7 @@ export class WebsocketService implements WSService, OnDestroy {
 					if (this.moduleConfig.debug) {
 						console.log('[WS] отключен от ', this.wsConfig.url);
 					}
-
+					this.title.next('Мы офлайн');
 					this.ws$$ = null;
 					this.connection$$.next(false);
 				}
@@ -119,7 +109,6 @@ export class WebsocketService implements WSService, OnDestroy {
 			.pipe(takeUntil(this.destroy$$))
 			.subscribe(isConnected => {
 				this.isConnected = isConnected;
-
 				// пробуем восстановить подключение при его отсутствии
 				if (!this.reconnection$$ && !this.isConnected) {
 					this.reconnect();
@@ -184,6 +173,7 @@ export class WebsocketService implements WSService, OnDestroy {
 					// закрываем поток, если количество попыток исчерпано
 					this.reconnection$$ = null;
 					if (!this.ws$$) {
+						this.title.next('Соединение разорвано окончательно, попробуй обновить страницу');
 						this.wsMessages$$.complete();
 						this.connection$$.complete();
 					}
@@ -220,7 +210,7 @@ export class WebsocketService implements WSService, OnDestroy {
 	 * @param event тип события, указанный в поле {@link WSMessage.event}
 	 * @param data любая информация, которую нужно отправить с сообщением указанного типа
 	 */
-	send(event: string, data: unknown = {}): void {
+	send<T>(event: string, data?: T | undefined): void {
 		this.loading.next(true);
 		if (event && this.isConnected) {
 			if (this.moduleConfig.debug) {
